@@ -250,15 +250,15 @@
               dense
               :headers="headersTableRight"
               :items="items"
-              :items-per-page="30"
+              :items-per-page="23"
               hide-default-header
               hide-default-footer
               class="elevation-1"
             >
-              <template v-slot:headers="{ headersTableRight }">
+              <template v-slot:headers="{ headers }">
                 <thead>
                   <tr>
-                    <td v-for="(item, index) in headersTableRight" :key="index">
+                    <td v-for="(item, index) in headers" :key="index">
                       {{ item.text }}
                     </td>
                   </tr>

@@ -2,7 +2,7 @@
   <div>
     <h2 class="white--text my-4">Bullish and Bearish Crypto Signals</h2>
     <v-row>
-      <v-col cols="12" sm="8">
+      <v-col cols="12" sm="7">
         <v-card :loading="loadingTable" color="#1e1e1e">
           <template slot="progress">
             <v-progress-linear color="green" indeterminate></v-progress-linear>
@@ -34,7 +34,7 @@
             :loading="loadingTable"
             class="elevation-1"
             sort-by="calories"
-            :items-per-page="30"
+            :items-per-page="29"
             :page="1"
             :headers="headers"
             :items="items"
@@ -58,8 +58,8 @@
                         <div
                           v-bind="attrs"
                           v-on="on"
-                          @click="showPopup()"
-                          class="d-flex align-center justify-space-between coin-name"
+                          @click="showPopup(item.coin_symbol)"
+                          class="d-flex align-center justify-evenly coin-name"
                         >
                           <img
                             style="
@@ -80,6 +80,10 @@
 
                             <div>
                               <i
+                                v-if="
+                                  getColorToChange(item.percent_change_5min) ==
+                                  `red--text`
+                                "
                                 style="
                                   font-size: 9px;
                                   color: red;
@@ -87,15 +91,28 @@
                                 "
                                 class="fa-solid fa-chevron-down"
                               ></i>
+                              <i
+                                v-else
+                                style="
+                                  font-size: 9px;
+                                  color: green;
+                                  margin-right: 8px;
+                                "
+                                class="fa-solid fa-chevron-up"
+                              ></i>
                               <span
-                                v-bind:class="getColorToPrice(item.coin_price)"
-                                class="text-caption mr-2"
+                                v-bind:class="
+                                  getColorToChange(item.percent_change_5min)
+                                "
+                                class="text-subtitle-2 mr-2"
                                 >${{ getPrice(item.coin_price) }}</span
                               >
                               <span
-                                v-bind:class="getColorToPrice(item.coin_price)"
                                 class="text-caption"
-                                >- 2.02 %</span
+                                v-bind:class="
+                                  getColorToChange(item.percent_change_5min)
+                                "
+                                >{{ item.percent_change_5min }}</span
                               >
                             </div>
                             <div>
@@ -216,25 +233,11 @@
           <Popup ref="formCoin"></Popup>
         </v-card>
       </v-col>
-      <v-col cols="12" sm="4">
-        <v-card :loading="loadingTable" color="#1e1e1e">
-          <v-card-title style="background-color: #514c4c">
-            <template slot="progress">
-              <v-progress-linear
-                color="green"
-                indeterminate
-              ></v-progress-linear>
-            </template>
-            <v-text-field
-              style="display: hidden"
-              v-model="search"
-              class="custom-label-color"
-              append-icon="mdi-magnify"
-              label="Search"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-card-title>
+      <v-col style="margin-left: -10px" cols="12" sm="5">
+        <v-card style="margin-top: 17%" :loading="loadingTable" color="#1e1e1e">
+          <template slot="progress">
+            <v-progress-linear color="green" indeterminate></v-progress-linear>
+          </template>
 
           <v-card-title
             class="d-flex justify-center align-center"
@@ -244,68 +247,55 @@
               Loading table... Please wait
             </p>
           </v-card-title>
-          <template>
-            <v-data-table
-              dark
-              dense
-              :headers="headersTableRight"
-              :items="items"
-              :items-per-page="23"
-              hide-default-header
-              hide-default-footer
-              class="elevation-1"
-            >
-              <template v-slot:headers="{ headers }">
-                <thead>
-                  <tr>
-                    <td v-for="(item, index) in headers" :key="index">
-                      {{ item.text }}
-                    </td>
-                  </tr>
-                </thead>
-              </template>
-              <template v-slot:body="{ items }">
-                <tbody>
-                  <tr v-for="(item, index) in items" :key="index">
-                    <td>{{ item.coin_symbol }}</td>
-                    <td>
-                      <span :class="getColor(getState(item.signals, `24h`))">
-                        <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
-                            <span v-bind="attrs" v-on="on">
-                              {{ getState(item.signals, "24h") }}</span
-                            >
-                          </template>
-                          <span class="white--text"
-                            >Timestamp:
-                            {{ getTimeStampToolip(item.updated_at) }}</span
+
+          <v-data-table
+            v-else
+            dark
+            dense
+            :headers="headersTableRight"
+            :items="items"
+            :items-per-page="23"
+            hide-default-footer
+            class="elevation-1"
+          >
+            <template v-slot:headers="{ headers }">
+              <thead>
+                <tr>
+                  <td v-for="(item, index) in headers" :key="index">
+                    {{ item.text }}
+                  </td>
+                </tr>
+              </thead>
+            </template>
+            <template v-slot:body="{ items }">
+              <tbody>
+                <tr v-for="(item, index) in items" :key="index">
+                  <td>{{ item.coin_symbol }}</td>
+                  <td>
+                    <span :class="getColor(getState(item.signals, `24h`))">
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on, attrs }">
+                          <span v-bind="attrs" v-on="on">
+                            {{ getState(item.signals, "24h") }}</span
                           >
-                        </v-tooltip>
-                      </span>
-                    </td>
-                    <td>
-                      <span :class="getColor(getState(item.signals, `4h`))">
-                        <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
-                            <span v-bind="attrs" v-on="on">
-                              {{ getState(item.signals, "4h") }}</span
-                            >
-                          </template>
-                          <span class="white--text"
-                            >Timestamp:
-                            {{ getTimeStampToolip(item.updated_at) }}</span
-                          >
-                        </v-tooltip>
-                      </span>
-                    </td>
-                    <td>{{ item.type }}</td>
-                    <td>${{ getPrice(item.coin_price) }}</td>
-                    <td>{{ item.updated_at }}</td>
-                  </tr>
-                </tbody>
-              </template>
-            </v-data-table>
-          </template>
+                        </template>
+                        <span class="white--text"
+                          >Timestamp:
+                          {{ getTimeStampToolip(item.updated_at) }}</span
+                        >
+                      </v-tooltip>
+                    </span>
+                  </td>
+
+                  <td>{{ item.type }}</td>
+
+                  <td>{{ getRandom() }}</td>
+                  <td>${{ getPrice(item.coin_price) }}</td>
+                  <td>{{ getTimeTableRight(item.updated_at) }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-data-table>
         </v-card>
       </v-col>
     </v-row>
@@ -315,34 +305,77 @@
 <script>
 import Popup from "./Popup.vue";
 import axios from "axios";
+
 export default {
   components: {
     Popup,
   },
   data: () => ({
     search: "",
+
     loadingTable: false,
     headers: [
-      { sortable: true, text: "", value: "symbol_name", width: "230px" },
-      { sortable: true, text: "", value: "type" },
-      { sortable: false, text: "24H", align: "center" },
-      { sortable: false, text: "4H", align: "center" },
-      { sortable: false, text: "1H", align: "center" },
-      { sortable: false, text: "30 Min", align: "center" },
-      { sortable: false, text: "15 Min", align: "center" },
-      { sortable: false, text: "5 Min", align: "center" },
+      { sortable: true, text: "", value: "symbol_name", width: "180px" },
+      { sortable: true, text: "", value: "type", width: "20px" },
+      { sortable: false, text: "24H", width: "20px", align: "center" },
+      { sortable: false, text: "4H", width: "20px", align: "center" },
+      { sortable: false, text: "1H", width: "20px", align: "center" },
+      { sortable: false, text: "30 Min", width: "20px", align: "center" },
+      { sortable: false, text: "15 Min", width: "20px", align: "center" },
+      { sortable: false, text: "5 Min", width: "20px", align: "center" },
     ],
     headersTableRight: [
-      { sortable: false, text: "Symbol", value: "coin_symbol", width: "230px" },
-      { sortable: false, text: "State", align: "center" },
-      { sortable: false, text: "Type", value: "type" },
-      { sortable: false, text: "Price", value: "coin_price", align: "center" },
+      { sortable: false, width: "30px", text: "Symbol", value: "coin_symbol" },
+      { sortable: false, width: "30px", text: "State", align: "center" },
+      { sortable: false, width: "30px", text: "Type", value: "type" },
+      { sortable: false, width: "30px", text: "Candle", value: "type" },
+      {
+        sortable: false,
+        width: "30px",
+        text: "Price",
+        value: "coin_price",
+        align: "center",
+      },
+      {
+        sortable: false,
+        width: "30px",
+        text: "Time",
+        value: "updated_at",
+        align: "center",
+      },
     ],
     items: [],
   }),
   methods: {
-    showPopup() {
-      this.$refs.formCoin.showDialog();
+    // async showPopup(item) {
+    //   const data = await axios.post(
+    //     "https://app.fidata.pro/api/quantifycrypto-coin",
+    //     {
+    //       symbol: item,
+    //     }
+    //   );
+    //   this.$refs.formCoin.showDialog(data.data);
+    // },
+
+    async getChangePercentage(coin) {
+      const data = await axios.post(
+        "https://app.fidata.pro/api/quantifycrypto-coin",
+        {
+          symbol: coin,
+        }
+      );
+      console.log(data.data, "data");
+      return data.data.coin_price;
+    },
+    getRandom() {
+      const arr = ["1h", "4h", "24h", "5min", "15min", "30min"];
+      const random = Math.floor(Math.random() * arr.length);
+      return arr[random];
+    },
+    getTimeTableRight(dateTimeString) {
+      const dateObj = new Date(dateTimeString);
+      const timeString = dateObj.toLocaleTimeString("en-US", { hour12: true });
+      return timeString;
     },
 
     getState(data, condition) {
@@ -356,9 +389,13 @@ export default {
       let price = data.toLocaleString("en-US");
       return price;
     },
-    getColorToPrice(data) {
-      console.log(data);
-      return "green--text";
+
+    getColorToChange(data) {
+      if (data > 0) {
+        return "green--text";
+      } else {
+        return "red--text";
+      }
     },
     getColorToScore(data) {
       if (data > 70) {
@@ -405,39 +442,49 @@ export default {
     this.loadingTable = true;
     axios
       .post("https://app.fidata.pro/api/quantifycrypto-signal")
-      .then((response) => {
-        let data = [...response.data];
+      .then(async (response) => {
+        const data1 = [...response.data];
+        const newRes = await axios.post(
+          "https://app.fidata.pro/api/quantifycrypto-coin"
+        );
+        const data2 = [...newRes.data];
+        const dataRel = data1.map((x) => ({
+          ...x,
+          ...data2.find((e) => x.coin_symbol == e.coin_symbol),
+        }));
+        console.log("data", dataRel);
+
         // lay gia tri thoi gian moi nhat qua updated_at
-        const maxObj = data.sort((a, b) => {
-          const timestampA = new Date(a.timestamp).getTime();
-          const timestampB = new Date(b.timestamp).getTime();
+        let maxObj = dataRel.sort((a, b) => {
+          let timestampA = new Date(a.timestamp).getTime();
+          let timestampB = new Date(b.timestamp).getTime();
           return timestampB - timestampA;
         });
 
-        // Lấy ra đối tượng có giá trị timestamp lớn nhất
-        const maxTimestampObject = maxObj.pop();
+        // // Lấy ra đối tượng có giá trị timestamp lớn nhất
+        let maxTimestampObject = maxObj.pop();
         console.log(maxTimestampObject, 1111);
 
-        // tạo khoa tim kiem theo gia tri moi nhat//
+        // // tạo khoa tim kiem theo gia tri moi nhat//
 
         let cutStr = maxTimestampObject.updated_at;
         let searchKey = cutStr.substring(0, 16);
         console.log(searchKey, 222222);
 
-        // lay mang 300 coin theo gia tri //
-        const filteredCoin = data.filter((item) => {
+        // // lay mang 300 coin theo gia tri //
+        let filteredCoin = dataRel.filter((item) => {
           return item.updated_at.includes(searchKey);
         });
-        console.log(filteredCoin, 33333);
+        // console.log(filteredCoin, 33333);
+        let uniqueArr = filteredCoin.filter(
+          (obj, index, self) =>
+            index ===
+              self.findIndex((t) => t.coin_symbol === obj.coin_symbol) ||
+            index === self.findIndex((t) => t.type === obj.type)
+        );
 
-        // gan mang vao table
-
-        // const uniqueArr = data.filter(
-        //   (obj, index, self) =>
-        //     index === self.findIndex((t) => t.coin_symbol === obj.coin_symbol)
-        // );
-        this.items = filteredCoin;
-        console.log(this.items, 222);
+        this.items = uniqueArr;
+        // console.log(this.items, 222);
         this.loadingTable = false;
       })
       .catch((error) => {
